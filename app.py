@@ -1,5 +1,5 @@
 from flask import Flask, g, request, session, redirect, url_for, render_template, Response
-from flask_simpleldap import LDAP
+# from flask_simpleldap import LDAP
 import sqlite3
 import datetime
 import io
