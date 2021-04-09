@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% set active_page = "edit" %}
+{% block body %}
+{% if admin or person.login|lower == username|lower %}
+<form method="post" action="{{ request.path }}">
+    <dl>
+        {% if admin %}
+        <dt>First Name:</dt>
+        <dd><input type="text" name="firstname" value="{{ person.firstname }}" class="focus" /></dd>
+        <dt>Middle Name:</dt>
+        <dd><input type="text" name="middlename" value="{{ person.middlename }}" class="focus" /></dd>
+        <dt>Last Name:</dt>
+        <dd><input type="text" name="lastname" value="{{ person.lastname }}" class="focus" /></dd>
+        <dt>Extension:</dt>
+        <dd><input type="text" name="intphone" value="{{ person.intphone }}" class="focus" /></dd>
+        <dt>E-Mail:</dt>
+        <dd><input type="text" name="email" value="{{ person.email }}" class="focus" /></dd>
+        <dt>Title:</dt>
+        <dd><input type="text" name="position" value="{{ person.position }}" class="focus" /></dd>
+        <dt>LDAP Login (for self editing of phone and birthday date):</dt>
+        <dd><input type="text" name="login" value="{{ person.login }}" class="focus" /></dd>
+        {% endif %}
+        <dt>Birthday (DD.MM.YY):</dt>
+        <dd><input type="text" name="birthday" value="{{ person.birthday }}" class="focus" /></dd>
+        <dt>Mobile phone:</dt>
+        <dd><input type="text" name="cellphone" value="{{ person.cellphone }}" class="focus" /></dd>
+        <dd><input type="submit" value="Save" id="red_button" /></dd>
+    </dl>
+</form>
+<!--{% endif %}-->
+{% endblock %}

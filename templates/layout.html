@@ -1,0 +1,401 @@
+<!doctype html>
+<html>
+<head>
+    <title>Phonebook</title>
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <style>
+
+/*
+	Max width before this PARTICULAR table gets nasty. This query will take effect for any screen smaller than 760px and also iPads specifically.
+	*/
+
+	table {
+  border-collapse: collapse;
+  font-family: Arial, Helvetica, sans-serif;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+td, th {
+  border: 1px solid #ddd;
+}
+
+	@media
+	  only screen and (max-width: 800px) and (max-device-width: 1024px) {
+
+		/* Force table to not be like tables anymore */
+		table, thead, tbody, th, td, tr {
+			display: block;
+		}
+
+		/* Hide table headers (but not display: none;, for accessibility) */
+		thead tr {
+			position: absolute;
+			top: -9999px;
+			left: -9999px;
+		}
+
+    tr {
+      margin: 0 0 1rem 0;
+    }
+
+    tr:nth-child(odd) {
+      background: #ccc;
+    }
+
+		td {
+			/* Behave  like a "row" */
+			border: none;
+			border-bottom: 1px solid #eee;
+			position: relative;
+			padding-left: 50%;
+		}
+
+		td:before {
+			/* Now like a table header */
+			position: absolute;
+			/* Top/left values mimic padding */
+			top: 0;
+			left: 6px;
+			width: 45%;
+			padding-right: 10px;
+			white-space: nowrap;
+		}
+
+		/*
+		Label the data
+    You could also use a data-* attribute and content for this. That way "bloats" the HTML, this way means you need to keep HTML and CSS in sync. Lea Verou has a clever way to handle with text-shadow.
+		*/
+		td:nth-of-type(1):before { content: "Title"; }
+		td:nth-of-type(2):before { content: "Last Name"; }
+		td:nth-of-type(3):before { content: "First Name"; }
+		td:nth-of-type(4):before { content: "Middle Name"; }
+		td:nth-of-type(5):before { content: "Extension"; }
+		td:nth-of-type(6):before { content: "Mobile phone"; }
+		td:nth-of-type(7):before { content: "E-Mail"; }
+		td:nth-of-type(8):before { content: "Birthday"; }
+		td:nth-of-type(9):before { content: "vCard"; }
+	}
+
+tr:nth-child(even){background-color: #f2f2f2;}
+
+tr:hover {background-color: #b3e5fc;}
+
+th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  vertical-align: middle;
+  background-color: #478fd2;
+  color: white;
+}
+
+.headerSortDown:after {
+  content: ' ';
+  position: relative;
+  left: 2px;
+  border: 8px solid transparent;
+}
+
+.headerSortDown:after {
+  top: 10px;
+  border-top-color: silver;
+}
+
+.headerSortDown {
+  padding-right: 10px;
+  cursor: pointer;
+}
+
+a.admin:link {
+  text-decoration: none;
+  color: #000000;
+}
+
+a.admin:visited {
+  text-decoration: none;
+  color: #000000;
+}
+
+a.admin:hover {
+  text-decoration: underline;
+  color: red;
+}
+
+a.admin:active {
+  text-decoration: underline;
+  color: red;
+}
+
+a.listlink:link {
+  text-decoration: none;
+  color: green;
+}
+
+a.listlink:visited {
+  text-decoration: none;
+  color: green;
+}
+
+a.listlink:hover {
+  text-decoration: underline;
+  color: #1b0e68;
+}
+
+a.listlink:active {
+  text-decoration: underline;
+  color: blue;
+}
+
+.active {
+  background-color: #478fd2;
+}
+input[type=text]:focus {
+  background-color: #ef9a9a;
+}
+.focus {
+    width: 100%;
+    padding: 12px 20px;
+    box-sizing: border-box;
+    border: 3px solid #ccc;
+    transition: 0.5s;
+}
+
+#red_button {
+  background-color: white;
+  color: black;
+  border: 2px solid #f44336;
+  width: 100%
+}
+
+#red_button:hover {
+  background-color: #f44336;
+  color: white;
+}
+
+.button {
+  display: inline-block;
+  border-radius: 4px;
+  background-color: #4CAF50;
+  border: none;
+  color: #FFFFFF;
+  text-align: center;
+  font-size: 10px;
+  padding: 12px;
+  width: 150px;
+  transition: all 0.5s;
+  cursor: pointer;
+}
+
+.button span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.button span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.button:hover span {
+  padding-right: 25px;
+}
+
+.button:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+
+footer {
+    position: relative;
+    height: 50px;
+    width: 100%;
+    background-color: #333333;
+    }
+
+p.copyright {
+    position: absolute;
+    width: 100%;
+    color: #fff;
+    line-height: 40px;
+    font-size: 0.7em;
+    text-align: center;
+    bottom:0;
+}
+
+@media screen and ( max-width: 800px ) {
+     .small-menu {
+          display: inline;
+     }
+     .large-menu {
+          display: none;
+     }
+}
+@media screen and ( min-width: 801px ) and ( max-width: 1024px ) {
+     .small-menu {
+          display: none;
+     }
+     .large-menu {
+          display:inline;
+          width: 100%;
+     }
+     .large-menu ul {
+          list-style-type: none;
+     }
+     .large-menu ul li {
+          display: inline;
+     }
+     .content: {
+          width: 100%;
+     }
+}
+@media screen and ( min-width: 1025px ) {
+     .small-menu {
+          display: none;
+     }
+     .large-menu {
+          display: inline;
+          float: left;
+          width: 100%;
+     }
+     .content{
+          float: right;
+          width: 80%;
+     }
+}
+
+
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+li {
+  float: left;
+  border-right:1px solid #bbb;
+}
+
+li:last-child {
+  border-right: none;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover:not(.active) {
+  background-color: #111;
+}
+
+.block {
+  display: block;
+  width: 100%;
+  border: none;
+  background-color: #478fd2;
+  color: white;
+  padding: 14px 28px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.block:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.dropdown {
+  position: relative;
+  display: block;
+}
+
+.dropdown-content {
+  display: none;
+  text-align: center;
+  width: 100%;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #f1f1f1}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown:hover .dropbtn {
+  background-color: #3e8e41;
+}
+
+    </style>
+</head>
+<body>
+
+<div class="small-menu">
+    <div class="dropdown">
+        <button class="block">Menu</button>
+    <div class="dropdown-content">
+              <a href="/">Phonebook</a>
+              <a href="/phonebook.pdf">PDF export</a>
+              <a href="/vCard/all.vcf">vCard export</a>
+              {% if login_id %}
+              <a href="/edit/{{ login_id }}">Edit own data</a>
+              {% endif %}
+              {% if admin %}
+              <a href="/new">Add employee</a>
+              {% endif %}
+              <a href="/logout">Logout</a>
+  </div>
+    </div><br></div>
+
+<div class="large-menu">
+<ul>
+    <li
+            {% if active_page=="index" %} class='active' {% endif %}><a href="/">Phonebook</a></li>
+    <li><a href="/phonebook.pdf">PDF export</a></li>
+    <li><a href="/vCard/all.vcf">vCard export</a></li>
+    {% if login_id %}
+    <li><a href="/edit/{{ login_id }}">Edit own data</a></li>
+    {% endif %}
+    {% if admin %}
+
+    <li><a href="/new">Add employee</a></li>
+    {% endif %}
+    <li style="float:right"><a href="/logout">Logout</a></li>
+</ul>
+    <br>
+</div>
+    {% for message in get_flashed_messages() %}
+    <div class=flash>{{ message }}</div>
+    {% endfor %}
+    {% block body %}{% endblock %}
+<br>
+<footer>
+    <p class="copyright">Phonebook Company Ltd.</p>
+</footer>
+</body>
+</html>

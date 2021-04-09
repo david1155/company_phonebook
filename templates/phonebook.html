@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+{% set active_page = "index" %}
+{% block body %}
+{% if people %}
+<table role="table" id="empl">
+    <thead role="rowgroup">
+    <tr role="row">
+        <th role="columnheader" onclick="sortTable(0)" class="headerSortDown">Title</th>
+        <th role="columnheader" onclick="sortTable(1)" class="headerSortDown">Last Name</th>
+        <th role="columnheader" onclick="sortTable(2)" class="headerSortDown">First Name</th>
+        <th role="columnheader" onclick="sortTable(3)" class="headerSortDown">Middle Name</th>
+        <th role="columnheader" onclick="sortTable(4)" class="headerSortDown">Ext.</th>
+        <th role="columnheader">Mobile phone</th>
+        <th role="columnheader">E-Mail</th>
+        <th role="columnheader">Birthday</th>
+        <th role="columnheader">vCard</th>
+        {% if admin %}
+        <th role="columnheader">Admin</th>
+        {% endif %}
+    </tr>
+    </thead>
+    <tbody role="rowgroup">
+    {% for person in people %}
+    <tr role="row">
+        <td role="cell">{% if person.position == "" %}{{ "&nbsp;"|safe }}{% else %}{{ person.position }}{% endif %}</td>
+        <td role="cell">{% if person.lastname == "" %}{{ "&nbsp;"|safe }}{% else %}<span style="font-weight:bold">{{ person.lastname }}{% endif %}</span></td>
+        <td role="cell">{% if person.firstname == "" %}{{ "&nbsp;"|safe }}{% else %}{{ person.firstname }}{% endif %}</td>
+        <td role="cell">{% if person.middlename == "" %}{{ "&nbsp;"|safe }}{% else %}{{ person.middlename }}{% endif %}</td>
+        <td role="cell">{% if person.intphone == "" %}{{ "&nbsp;"|safe }}{% else %}{{ person.intphone }}{% endif %}</td>
+        <td role="cell">{% if person.cellphone == "" %}{{ "&nbsp;"|safe }}{% else %}<a href="tel:{{ person.cellphone }}" class="listlink">{{ person.cellphone }}</a>{% endif %}</td>
+        <td role="cell">{% if person.email == "" %}{{ "&nbsp;"|safe }}{% else %}<a href="mailto:{{ person.email }}" class="listlink">{{ person.email }}</a>{% endif %}</td>
+        <td role="cell">{% if person.birthday == "" %}{{ "&nbsp;"|safe }}{% else %}{{ person.birthday }}{% endif %}</td>
+        <td role="cell"><a href="/vCard/{{ person.id }}.vcf"><button class="button" style="vertical-align:middle"><span>vCard</span></button></a></td>
+        {% if admin %}
+        <td role="cell"><a href="{{ url_for('edit', id=person.id) }}" class="admin">Edit</a> ||
+            <a href="{{ url_for('delete', id=person.id) }}" class="admin" onclick="return confirm('Are you sure?');">Delete</a></td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+    </tbody>
+    {% else %}
+    ERROR
+    {% endif %}
+</table>
+
+<script>
+function sortTable(n) {
+  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  table = document.getElementById("empl");
+  switching = true;
+  //Set the sorting direction to ascending:
+  dir = "asc";
+  /*Make a loop that will continue until
+  no switching has been done:*/
+  while (switching) {
+    //start by saying: no switching is done:
+    switching = false;
+    rows = table.rows;
+    /*Loop through all table rows (except the
+    first, which contains table headers):*/
+    for (i = 1; i < (rows.length - 1); i++) {
+      //start by saying there should be no switching:
+      shouldSwitch = false;
+      /*Get the two elements you want to compare,
+      one from current row and one from the next:*/
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+      /*check if the two rows should switch place,
+      based on the direction, asc or desc:*/
+      if (dir == "asc") {
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          //if so, mark as a switch and break the loop:
+          shouldSwitch= true;
+          break;
+        }
+      } else if (dir == "desc") {
+        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+          //if so, mark as a switch and break the loop:
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+    if (shouldSwitch) {
+      /*If a switch has been marked, make the switch
+      and mark that a switch has been done:*/
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      //Each time a switch is done, increase this count by 1:
+      switchcount ++;
+    } else {
+      /*If no switching has been done AND the direction is "asc",
+      set the direction to "desc" and run the while loop again.*/
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+</script>
+
+{% endblock %}
