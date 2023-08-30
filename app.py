@@ -20,14 +20,11 @@ def connect_db():
 
 
 def remove_prefix(text, prefix):
-    if text.startswith(prefix):
-        return text[len(prefix):]
-    return text
+    return text[len(prefix):] if text.startswith(prefix) else text
 
 
 def vCard_gen(person):
-    vcf = "BEGIN:VCARD"
-    vcf += "\n"
+    vcf = "BEGIN:VCARD" + "\n"
     vcf += "VERSION:3.0"
     vcf += "\n"
     vcf += "N:" + person.get('lastname') + ";" + person.get('firstname')
@@ -36,7 +33,7 @@ def vCard_gen(person):
     vcf += "\n"
     vcf += "EMAIL;TYPE=INTERNET:" + person.get('email')
     vcf += "\n"
-    vcf += "ORG:"+org_vcard
+    vcf += f"ORG:{org_vcard}"
     vcf += "\n"
     if person.get('cellphone') != "" and person.get('cellphone') is not None:
         vcf += "TEL;type=CELL;type=pref:" + person.get('cellphone')
@@ -90,7 +87,6 @@ def teardown_request(exception):
 
 
 @app.route('/')
-# @ldap.login_required
 def index():
     # username = remove_prefix(session['user_id'], conf_domain+'\\')
     # if str(username).lower() in admin_users:
@@ -101,10 +97,9 @@ def index():
     cur = g.db.execute(
         'SELECT id, position, lastname, firstname, middlename, intphone, cellphone, email, birthday, login FROM persons WHERE active ORDER BY lastname')
 
-    people = []
     login_id = False
-    for row in cur.fetchall():
-        people.append({
+    people = [
+        {
             'id': row[0],
             'position': row[1],
             'lastname': row[2],
@@ -114,17 +109,14 @@ def index():
             'cellphone': row[6],
             'email': row[7],
             'birthday': row[8],
-        })
-
-        # if str(username).casefold() == str(row[9]).casefold():
-        #     login_id = row[0]
-
+        }
+        for row in cur.fetchall()
+    ]
     return render_template('phonebook.html', people=people, login_id=login_id, admin=admin)
 
 
 @app.route('/new', endpoint='edit', methods=['GET', 'POST'])
 @app.route('/edit/<id>', methods=['GET', 'POST'])
-# @ldap.login_required
 def edit(id=None):
     # username = remove_prefix(session['user_id'], conf_domain+'\\')
     # if str(username).lower() in admin_users:
@@ -174,33 +166,28 @@ def edit(id=None):
             return redirect(url_for('index'))
         else:
             person = request.form
-    else:
-        if id:
-            row = g.db.execute(
-                """select firstname, middlename, lastname, intphone, cellphone, email, position, birthday, login from persons where id=?""",
-                [id]).fetchone()
-            person = {'firstname': row[0],
-                      'middlename': row[1],
-                      'lastname': row[2],
-                      'intphone': row[3],
-                      'cellphone': row[4],
-                      'email': row[5],
-                      'position': row[6],
-                      'birthday': row[7],
-                      'login': row[8],
-                      }
+    elif id:
+        row = g.db.execute(
+            """select firstname, middlename, lastname, intphone, cellphone, email, position, birthday, login from persons where id=?""",
+            [id]).fetchone()
+        person = {'firstname': row[0],
+                  'middlename': row[1],
+                  'lastname': row[2],
+                  'intphone': row[3],
+                  'cellphone': row[4],
+                  'email': row[5],
+                  'position': row[6],
+                  'birthday': row[7],
+                  'login': row[8],
+                  }
 
     return render_template('edit.html', person=person, admin=admin, username=username)
 
 
 @app.route('/delete/<id>')
-# @ldap.login_required
 def delete(id):
     username = remove_prefix(session['user_id'], 'MAIN\\')
-    if username in admin_users:
-        admin = True
-    else:
-        admin = False
+    admin = username in admin_users
     g.db.execute('delete from persons where id=?', [id])
     g.db.commit()
     return redirect(url_for('index'))
@@ -216,9 +203,8 @@ def login():
         test = ldap.bind_user(user, passwd)
         if test is None or passwd == '':
             return render_template('login.html', failed=True)
-        else:
-            session['user_id'] = remove_prefix(request.form['user'], conf_domain + '\\')
-            return redirect('/')
+        session['user_id'] = remove_prefix(request.form['user'], conf_domain + '\\')
+        return redirect('/')
     return render_template('login.html', failed=False)
 
 
@@ -242,13 +228,11 @@ def vCard(id):
 
 
 @app.route('/vCard/all.vcf')
-# @ldap.login_required
 def vCard_all():
     cur = g.db.execute(
         'SELECT id, position, lastname, firstname, middlename, intphone, cellphone, email, birthday, login FROM persons WHERE active ORDER BY lastname')
-    people = []
-    for row in cur.fetchall():
-        people.append({
+    people = [
+        {
             'id': row[0],
             'position': row[1],
             'lastname': row[2],
@@ -258,13 +242,10 @@ def vCard_all():
             'cellphone': row[6],
             'email': row[7],
             'birthday': row[8],
-        })
-
-    vcard_phonebook = ""
-
-    for person in people:
-        vcard_phonebook += vCard_gen(person)
-
+        }
+        for row in cur.fetchall()
+    ]
+    vcard_phonebook = "".join(vCard_gen(person) for person in people)
     return Response(vcard_phonebook, mimetype='text/x-vcard')
 
 
